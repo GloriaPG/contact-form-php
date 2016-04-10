@@ -1,97 +1,131 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Cotactanos!</title>
+    <link rel="stylesheet" type="text/css" href="contactform.css">
+  </head>
+  <body>
+    <div class="container">
+     <form id="contact">
 <?php
 if(isset($_POST['email'])) {
+
+    function mail_attachment($filename, $path, $mailto, $from_mail, $from_name, $replyto, $subject, $message) {
+        $file = $path.$filename;
+        $file_size = filesize($file);
+        $handle = fopen($file, "r");
+        $content = fread($handle, $file_size);
+        fclose($handle);
+        $content = chunk_split(base64_encode($content));
+        $uid = md5(uniqid(time()));
+        $name = basename($file);
+        $header = "From: ".$from_name." <".$from_mail.">\r\n";
+        $header .= "Reply-To: ".$replyto."\r\n";
+        $header .= "MIME-Version: 1.0\r\n";
+        $header .= "Content-Type: multipart/mixed; boundary=\"".$uid."\"\r\n\r\n";
+        $header .= "This is a multi-part message in MIME format.\r\n";
+        $header .= "--".$uid."\r\n";
+        $header .= "Content-type:text/plain; charset=iso-8859-1\r\n";
+        $header .= "Content-Transfer-Encoding: 7bit\r\n\r\n";
+        $header .= $message."\r\n\r\n";
+        $header .= "--".$uid."\r\n";
+        $header .= "Content-Type: application/octet-stream; name=\"".$filename."\"\r\n"; // use different content types here
+        $header .= "Content-Transfer-Encoding: base64\r\n";
+        $header .= "Content-Disposition: attachment; filename=\"".$filename."\"\r\n\r\n";
+        $header .= $content."\r\n\r\n";
+        $header .= "--".$uid."--";
+        if (mail($mailto, $subject, "", $header)) {
+            return True;
+        } else {
+            return False;
+        }
+    }
  
-    // Edita las dos líneas siguientes con tu dirección de correo y asunto personalizados
+    /*** 
+    * Configuración de asunto y destinatario.
+    * - email_to  : Es el correo al que le será enviado el mail.
+    * - email_subject : Es el asunto de el correo.
+    */
  
-    $email_to = "
- nombre@tucorreo.com";
+    $email_to = "zatoryprivate@gmail.com"; //"pruebas@zaachilagourmet.com";
  
-    $email_subject = "Tu Asunto de correo";   
+    $email_subject = "Tenemos un nuevo comentario!";
+
+    $hasErrors = False;  
  
     function died($error) {
  
-        // si hay algún error, el formulario puede desplegar su mensaje de aviso
+        // Si existe un error en el formulario se mostrará un mensaje a el usuario.
+
+        echo "<h3>Opps! Algo salió mal...</h3><br />";
  
-        echo "Lo sentimos, hubo un error en sus datos y el formulario no puede ser enviado en este momento. ";
- 
-        echo "Detalle de los errores.<br /><br />";
+        echo "Errores.<br />";
         
-        echo $error."<br /><br />";
+        echo $error."<br />";
  
-        echo "Porfavor corrija estos errores e inténtelo de nuevo.<br /><br />";
+        echo "Por favor corrija sus datos.<br /><br />";
+
         die();
     }
  
-    // Se valida que los campos del formulairo estén llenos
+    // Validamos de el lado de el servidor que los datos que son requeridos esten siendo enviados.
  
-    if(!isset($_POST['first_name']) ||
+    if(!isset($_POST['name']) ||
  
         !isset($_POST['last_name']) ||
  
         !isset($_POST['email']) ||
  
-        !isset($_POST['telephone']) ||
+        !isset($_POST['company']) ||
+
+        !isset($_POST['comments'])
+        ) {
  
-        !isset($_POST['message'])) {
- 
-        died('Lo sentimos pero parece haber un problema con los datos enviados.');       
+        died('Datos incompletos, por favor ingrese los datos obligatorios.');       
  
     }
- //En esta parte el valor "name" nos sirve para crear las variables que recolectaran la información de cada campo
+
+    // Tomamos los varoles de el formulario.
+    // Los tomamos de el metodo POST porque es por el cual fueron enviados.
     
-    $first_name = $_POST['first_name']; // requerido
+    $name = $_POST['name']; // requerido
  
     $last_name = $_POST['last_name']; // requerido
  
     $email_from = $_POST['email']; // requerido
  
-    $telephone = $_POST['telephone']; // no requerido 
+    $company = $_POST['company']; // requerido
 
-    $message = $_POST['message']; // requerido
+    $comments = $_POST['comments']; // no requerido
  
-    $error_message = "Error";
+    $error_message = "";
 
-//En esta parte se verifica que la dirección de correo sea válida 
+  // Validamos de el lado de el servidor que el parámetro email que nos stán enviando
+  // tenga el formato de correo.
     
-   $email_exp = '/^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/';
+   $email_exp = '/^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/'; // Esta es una expresión regular que buscará el formato de email.
  
-  if(!preg_match($email_exp,$email_from)) {
- 
-    $error_message .= 'La dirección de correo proporcionada no es válida.<br />';
- 
-  }
+    if(!preg_match($email_exp,$email_from)) {
 
-//En esta parte se validan las cadenas de texto
+      $hasErrors=True;
 
-    $string_exp = "/^[A-Za-z .'-]+$/";
+      $error_message .= 'Su correo no es valido, por favor ingresar un correo valido, ejemplo : ejemplo@gmail.com .<br />';
+   
+    }
 
-  if(!preg_match($string_exp,$first_name)) {
  
-    $error_message .= 'El formato del nombre no es válido<br />';
- 
-  }
- 
-  if(!preg_match($string_exp,$last_name)) {
- 
-    $error_message .= 'el formato del apellido no es válido.<br />';
- 
-  }
- 
-  if(strlen($message) < 2) {
- 
-    $error_message .= 'El formato del texto no es válido.<br />';
- 
-  }
- 
-  if(strlen($error_message) > 0) {
+  if($hasErrors) {
  
     died($error_message);
  
   }
  
-//A partir de aqui se contruye el cuerpo del mensaje tal y como llegará al correo
+  /***
+  * Crearción de el correo que estaremos enviando.
+  */
 
-    $email_message = "Contenido del Mensaje.\n\n";
+    $email_message = "Nuevos comentarios.\n\n";
  
      
  
@@ -105,38 +139,50 @@ if(isset($_POST['email'])) {
  
      
  
-    $email_message .= "Nombre: ".clean_string($first_name)."\n";
+    $email_message .= "Nombre: ".clean_string($name)."\n";
  
-    $email_message .= "Apellido: ".clean_string($last_name)."\n";
+    $email_message .= "Apellidos: ".clean_string($last_name)."\n";
  
     $email_message .= "Email: ".clean_string($email_from)."\n";
  
-    $email_message .= "Teléfono: ".clean_string($telephone)."\n";
+    $email_message .= "Empresa: ".clean_string($company)."\n";
  
-    $email_message .= "Mensaje: ".clean_string($message)."\n";
+    $email_message .= "Comentarios: ".clean_string($comments)."\n";
   
  
-//Se crean los encabezados del correo
- 
-$headers = 'From: '.$email_from."\r\n".
- 
-'Reply-To: '.$email_from."\r\n" .
- 
-'X-Mailer: PHP/' . phpversion();
- 
-@mail($email_to, $email_subject, $email_message, $headers);  
- 
+  //Se crean los encabezados del correo
+   
+  $headers = 'From: '.$email_from."\r\n".
+   
+  'Reply-To: '.$email_from."\r\n" .
+   
+  'X-Mailer: PHP/' . phpversion();
+   
+  try {
+      mail($email_to, $email_subject, $email_message, $headers);
+  } catch (Exception $e) {
+      echo "<h3>Opps! Algo salió mal...</h3><br />";
+      echo "<h4> Por el momento no podemos atenderte, por favor,intenta más tarde.</h4>";
+  }
+
+  $my_file = "document.pdf"; // puede ser cualquier formato
+  $my_path = getcwd().'/';
+  $my_name = $name;
+  $my_mail = $email_to;
+  $my_replyto = $email_to;
+  $my_subject = "Archivo adjunto";
+  $my_message = "Tu mensaje";
+  mail_attachment($my_file, $my_path, $email, $my_mail, $my_name, $my_replyto, $my_subject, $my_message);
+  
 ?>
  
- 
- 
-<!-- incluye aqui tu propio mensaje de Éxito-->
- 
-Gracias! Nos pondremos en contacto contigo a la brevedad
- 
- 
+<h3>Gracias por contactarnos!</h3>
 <?php
  
 }
  
 ?>
+      </form>
+    </div>
+  </body>
+</html>

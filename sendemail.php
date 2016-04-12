@@ -77,9 +77,7 @@ if(isset($_POST['email'])) {
  
         !isset($_POST['email']) ||
  
-        !isset($_POST['company']) ||
-
-        !isset($_POST['comments'])
+        !isset($_POST['company'])
         ) {
  
         died('Datos incompletos, por favor ingrese los datos obligatorios.');       
@@ -166,7 +164,7 @@ if(isset($_POST['email'])) {
   }
 
   $my_file = "document.pdf"; // puede ser cualquier formato
-  $my_path = getcwd().'/';
+  $my_path = getcwd().'/pdf/';
   $my_name = $name;
   $my_mail = $email_to;
   $my_replyto = $email_to;

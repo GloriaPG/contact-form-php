@@ -163,7 +163,7 @@ if(isset($_POST['email'])) {
       echo "<h4> Por el momento no podemos atenderte, por favor,intenta más tarde.</h4>";
   }
 
-  $my_file = "document.pdf"; // puede ser cualquier formato
+  $my_file = "XIV_PRESENTACION_HEB-101515.pdf"; // puede ser cualquier formato
   $my_path = getcwd().'/pdf/';
   $my_name = $name;
   $my_mail = $email_to;

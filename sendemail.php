@@ -48,7 +48,7 @@ if(isset($_POST['email'])) {
     * - email_subject : Es el asunto de el correo.
     */
  
-    $email_to = "zatoryprivate@gmail.com"; //"pruebas@zaachilagourmet.com";
+    $email_to = "pruebas@zaachilagourmet.com";
  
     $email_subject = "Tenemos un nuevo comentario!";
 

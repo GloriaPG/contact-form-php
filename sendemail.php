@@ -9,6 +9,7 @@
     <div class="container">
      <form id="contact">
 <?php
+require_once('class.phpmailer.php');
 if(isset($_POST['email'])) {
 
     
@@ -61,7 +62,7 @@ if(isset($_POST['email'])) {
  
     $last_name = $_POST['last_name']; // requerido
  
-    $email_from = $_POST['email']; // requerido
+    $email_from = trim($_POST['email']); // requerido
  
     $company = $_POST['company']; // requerido
 
@@ -127,6 +128,7 @@ if(isset($_POST['email'])) {
   'X-Mailer: PHP/' . phpversion();
    
   try {
+      //mail($email_to, $email_subject, $email_message, $headers);
       mail($email_to, $email_subject, $email_message, $headers);
   } catch (Exception $e) {
       echo "<h3>Opps! Algo salió mal...</h3><br />";
@@ -137,50 +139,29 @@ if(isset($_POST['email'])) {
   /*** 
   * Función para enviar correo con archivo pdf adjunto.
   */
-  function mail_attachment($name,$email,$to,$from,$subject,$mainMessage,$fileatt,$fileatttype,$fileattname, $headers) {
-          // Obtener archivo.
-          $file = fopen($fileatt, 'rb');
-          $data = fread($file, filesize($fileatt));
-          fclose($file);
+  function mail_attachment($name,$to,$from,$subject,$mainMessage,$fileatt,$fileattname) {
+          $email = new PHPMailer();
+          $email->From      = $from;
+          $email->FromName  = $name;
+          $email->Subject   = $subject;
+          $email->Body      = $mainMessage;
+          $email->AddAddress($to);
 
-          // Abjuntar archivo.
-          $semi_rand     = md5(time());
-          $mime_boundary = "==Multipart_Boundary_x{$semi_rand}x";
-          $headers      .= "\nMIME-Version: 1.0\n" .
-            "Content-Type: multipart/mixed;\n" .
-            " boundary=\"{$mime_boundary}\"";
-            $message = "This is a multi-part message in MIME format.\n\n" .
-            "-{$mime_boundary}\n" .
-            "Content-Type: text/plain; charset=\"iso-8859-1\n" .
-            "Content-Transfer-Encoding: 7bit\n\n" .
-            $mainMessage  . "\n\n";
+          $file_to_attach = $fileatt;
 
-          $data = chunk_split(base64_encode($data));
-          $message .= "--{$mime_boundary}\n" .
-            "Content-Type: {$fileatttype};\n" .
-            " name=\"{$fileattname}\"\n" .
-            "Content-Disposition: attachment;\n" .
-            " filename=\"{$fileattname}\"\n" .
-            "Content-Transfer-Encoding: base64\n\n" .
-          $data . "\n\n" .
-           "-{$mime_boundary}-\n";
+          $email->AddAttachment( $file_to_attach , $fileattname );
 
-          // Send the email
-          mail($to, $subject, $message, $headers);
+          return $email->Send();
       }
  
-         // Settings
-          $name        = "Zaachilagourmet";  // Nombre abjunto al correo.
-          $email       = $email_to; // Email de quien envía el correo (web@master.com, etc..).
-          $to          = "$name <$email_from>"; //Email al que le llegará el archivo abjunto.
-          $from        = "Zaachilagourmet "; // Nombre de quien envía el correo.
-          $subject     = "Gracias por tus comentarios!"; // Asunto de el corroe.
-          $mainMessage = "Hola, gracias por tus comentarios!."; // Mensaje adjunto.
-          $fileatt     = getcwd().'/pdf/XIV_PRESENTACION_HEB-101515.pdf'; // Lo calización de el archivo, se puede modificar el nombre de carpeta y archivo.
-          $fileatttype = "application/pdf"; // Content type de el archvio , ejemplo de otros content types : http://webcheatsheet.com/php/create_word_excel_csv_files_with_php.php
-          $fileattname = "XIV_PRESENTACION_HEB-101515.pdf"; // Nombre de el archivo este puedes modificarlo  sin problema.
-          $headers = "From: $from"; // Inicialización de el header.
-          mail_attachment($name,$email,$to,$from,$subject,$mainMessage,$fileatt,$fileatttype,$fileattname, $headers);
+      // Settings
+      $name        = "Zaachilagourmet";  // Nombre abjunto de el from.
+      $from        = "pruebas@zaachilagourmet.com"; // Nombre de quien envía el correo.
+      $subject     = "Gracias por tus comentarios!"; // Asunto de el corroe.
+      $mainMessage = "Hola, gracias por tus comentarios!."; // Mensaje adjunto.
+      $fileatt     = getcwd().'/pdf/XIV_PRESENTACION_HEB-101515.pdf'; // Lo calización de el archivo, se puede modificar el nombre de carpeta y archivo.
+      $fileattname = "XIV_PRESENTACION_HEB-101515.pdf"; // Nombre de el archivo este puedes modificarlo  sin problema.
+      mail_attachment($name,$email_from,$from,$subject,$mainMessage,$fileatt,$fileattname)
   
 ?>
  

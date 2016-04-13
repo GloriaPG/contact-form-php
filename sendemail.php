@@ -11,46 +11,16 @@
 <?php
 if(isset($_POST['email'])) {
 
-    function mail_attachment($filename, $path, $mailto, $from_mail, $from_name, $replyto, $subject, $message) {
-        $file = $path.$filename;
-        $file_size = filesize($file);
-        $handle = fopen($file, "r");
-        $content = fread($handle, $file_size);
-        fclose($handle);
-        $content = chunk_split(base64_encode($content));
-        $uid = md5(uniqid(time()));
-        $name = basename($file);
-        $header = "From: ".$from_name." <".$from_mail.">\r\n";
-        $header .= "Reply-To: ".$replyto."\r\n";
-        $header .= "MIME-Version: 1.0\r\n";
-        $header .= "Content-Type: multipart/mixed; boundary=\"".$uid."\"\r\n\r\n";
-        $header .= "This is a multi-part message in MIME format.\r\n";
-        $header .= "--".$uid."\r\n";
-        $header .= "Content-type:text/plain; charset=iso-8859-1\r\n";
-        $header .= "Content-Transfer-Encoding: 7bit\r\n\r\n";
-        $header .= $message."\r\n\r\n";
-        $header .= "--".$uid."\r\n";
-        $header .= "Content-Type: application/octet-stream; name=\"".$filename."\"\r\n"; // use different content types here
-        $header .= "Content-Transfer-Encoding: base64\r\n";
-        $header .= "Content-Disposition: attachment; filename=\"".$filename."\"\r\n\r\n";
-        $header .= $content."\r\n\r\n";
-        $header .= "--".$uid."--";
-        if (mail($mailto, $subject, "", $header)) {
-            return True;
-        } else {
-            return False;
-        }
-    }
- 
+    
+
     /*** 
     * Configuración de asunto y destinatario.
     * - email_to  : Es el correo al que le será enviado el mail.
     * - email_subject : Es el asunto de el correo.
     */
  
-    $email_to = "pruebas@zaachilagourmet.com";
- 
     $email_subject = "Tenemos un nuevo comentario!";
+    $email_to = "pruebas@zaachilagourmet.com"; // Dirección de correo a dónde llegan los datos ingresados en el formulario.
 
     $hasErrors = False;  
  
@@ -95,7 +65,7 @@ if(isset($_POST['email'])) {
  
     $company = $_POST['company']; // requerido
 
-    $comments = $_POST['comments']; // no requerido
+    $comments = $_POST['comments']; // no requerido en caso de querer hacerlo requerido agregar la validación en la linea 50.
  
     $error_message = "";
 
@@ -163,14 +133,51 @@ if(isset($_POST['email'])) {
       echo "<h4> Por el momento no podemos atenderte, por favor,intenta más tarde.</h4>";
   }
 
-  $my_file = "XIV_PRESENTACION_HEB-101515.pdf"; // puede ser cualquier formato
-  $my_path = getcwd().'/pdf/';
-  $my_name = $name;
-  $my_mail = $email_to;
-  $my_replyto = $email_to;
-  $my_subject = "Archivo adjunto";
-  $my_message = "Tu mensaje";
-  mail_attachment($my_file, $my_path, $email, $my_mail, $my_name, $my_replyto, $my_subject, $my_message);
+
+  function mail_attachment($name,$email,$to,$from,$subject,$mainMessage,$fileatt,$fileatttype,$fileattname, $headers) {
+          // File
+          $file = fopen($fileatt, 'rb');
+          $data = fread($file, filesize($fileatt));
+          fclose($file);
+
+          // This attaches the file
+          $semi_rand     = md5(time());
+          $mime_boundary = "==Multipart_Boundary_x{$semi_rand}x";
+          $headers      .= "\nMIME-Version: 1.0\n" .
+            "Content-Type: multipart/mixed;\n" .
+            " boundary=\"{$mime_boundary}\"";
+            $message = "This is a multi-part message in MIME format.\n\n" .
+            "-{$mime_boundary}\n" .
+            "Content-Type: text/plain; charset=\"iso-8859-1\n" .
+            "Content-Transfer-Encoding: 7bit\n\n" .
+            $mainMessage  . "\n\n";
+
+          $data = chunk_split(base64_encode($data));
+          $message .= "--{$mime_boundary}\n" .
+            "Content-Type: {$fileatttype};\n" .
+            " name=\"{$fileattname}\"\n" .
+            "Content-Disposition: attachment;\n" .
+            " filename=\"{$fileattname}\"\n" .
+            "Content-Transfer-Encoding: base64\n\n" .
+          $data . "\n\n" .
+           "-{$mime_boundary}-\n";
+
+          // Send the email
+          mail($to, $subject, $message, $headers);
+      }
+ 
+         // Settings
+          $name        = "Zaachilagourmet";
+          $email       = $email_to;
+          $to          = "$name <$email_from>";
+          $from        = "Zaachilagourmet ";
+          $subject     = "Gracias por tus comentarios!";
+          $mainMessage = "Hola, gracias por tus comentarios!.";
+          $fileatt     = getcwd().'/pdf/XIV_PRESENTACION_HEB-101515.pdf'; //file location
+          $fileatttype = "application/pdf";
+          $fileattname = "XIV_PRESENTACION_HEB-101515.pdf"; //name that you want to use to send or you can use the same name
+          $headers = "From: $from";
+          mail_attachment($name,$email,$to,$from,$subject,$mainMessage,$fileatt,$fileatttype,$fileattname, $headers);
   
 ?>
  

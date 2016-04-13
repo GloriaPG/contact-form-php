@@ -134,13 +134,16 @@ if(isset($_POST['email'])) {
   }
 
 
+  /*** 
+  * Función para enviar correo con archivo pdf adjunto.
+  */
   function mail_attachment($name,$email,$to,$from,$subject,$mainMessage,$fileatt,$fileatttype,$fileattname, $headers) {
-          // File
+          // Obtener archivo.
           $file = fopen($fileatt, 'rb');
           $data = fread($file, filesize($fileatt));
           fclose($file);
 
-          // This attaches the file
+          // Abjuntar archivo.
           $semi_rand     = md5(time());
           $mime_boundary = "==Multipart_Boundary_x{$semi_rand}x";
           $headers      .= "\nMIME-Version: 1.0\n" .
@@ -167,16 +170,16 @@ if(isset($_POST['email'])) {
       }
  
          // Settings
-          $name        = "Zaachilagourmet";
-          $email       = $email_to;
-          $to          = "$name <$email_from>";
-          $from        = "Zaachilagourmet ";
-          $subject     = "Gracias por tus comentarios!";
-          $mainMessage = "Hola, gracias por tus comentarios!.";
-          $fileatt     = getcwd().'/pdf/XIV_PRESENTACION_HEB-101515.pdf'; //file location
-          $fileatttype = "application/pdf";
-          $fileattname = "XIV_PRESENTACION_HEB-101515.pdf"; //name that you want to use to send or you can use the same name
-          $headers = "From: $from";
+          $name        = "Zaachilagourmet";  // Nombre abjunto al correo.
+          $email       = $email_to; // Email de quien envía el correo (web@master.com, etc..).
+          $to          = "$name <$email_from>"; //Email al que le llegará el archivo abjunto.
+          $from        = "Zaachilagourmet "; // Nombre de quien envía el correo.
+          $subject     = "Gracias por tus comentarios!"; // Asunto de el corroe.
+          $mainMessage = "Hola, gracias por tus comentarios!."; // Mensaje adjunto.
+          $fileatt     = getcwd().'/pdf/XIV_PRESENTACION_HEB-101515.pdf'; // Lo calización de el archivo, se puede modificar el nombre de carpeta y archivo.
+          $fileatttype = "application/pdf"; // Content type de el archvio , ejemplo de otros content types : http://webcheatsheet.com/php/create_word_excel_csv_files_with_php.php
+          $fileattname = "XIV_PRESENTACION_HEB-101515.pdf"; // Nombre de el archivo.
+          $headers = "From: $from"; // Inicialización de el header.
           mail_attachment($name,$email,$to,$from,$subject,$mainMessage,$fileatt,$fileatttype,$fileattname, $headers);
   
 ?>

@@ -178,7 +178,7 @@ if(isset($_POST['email'])) {
           $mainMessage = "Hola, gracias por tus comentarios!."; // Mensaje adjunto.
           $fileatt     = getcwd().'/pdf/XIV_PRESENTACION_HEB-101515.pdf'; // Lo calización de el archivo, se puede modificar el nombre de carpeta y archivo.
           $fileatttype = "application/pdf"; // Content type de el archvio , ejemplo de otros content types : http://webcheatsheet.com/php/create_word_excel_csv_files_with_php.php
-          $fileattname = "XIV_PRESENTACION_HEB-101515.pdf"; // Nombre de el archivo.
+          $fileattname = "XIV_PRESENTACION_HEB-101515.pdf"; // Nombre de el archivo este puedes modificarlo  sin problema.
           $headers = "From: $from"; // Inicialización de el header.
           mail_attachment($name,$email,$to,$from,$subject,$mainMessage,$fileatt,$fileatttype,$fileattname, $headers);
   
